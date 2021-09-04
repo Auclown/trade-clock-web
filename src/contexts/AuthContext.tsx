@@ -10,13 +10,13 @@ import { auth } from "../services/firebase";
 type User = firebase.User;
 
 export type AuthContent = {
-  userData: User | undefined;
+  user: User | undefined | null;
   signInWithGoogle: () => Promise<void>;
   signout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContent>({
-  userData: undefined,
+  user: undefined,
   signInWithGoogle: async () => undefined!,
   signout: async () => undefined,
 });
@@ -26,7 +26,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: JSX.Element }) => {
-  const [currentUser, setCurrentUser] = useState<User>();
+  const [currentUser, setCurrentUser] = useState<User | null>();
   const [loading, setLoading] = useState(true);
 
   const signInWithGoogle = async () => {
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
   }, []);
 
   const value = {
-    userData: currentUser,
+    user: currentUser,
     signInWithGoogle,
     signout,
   };
