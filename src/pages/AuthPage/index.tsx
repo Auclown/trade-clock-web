@@ -5,18 +5,25 @@ import { auth } from "../../services/firebase";
 
 export const AuthPage = (): JSX.Element => {
   const [user, setUser] = useState<firebase.User>();
+  const [token, setToken] = useState<string>();
   const { signInWithGoogle } = useAuth();
 
-  const getCurrentUser = () => {
-    return auth.currentUser;
-  };
-
   useEffect(() => {
-    auth.onAuthStateChanged((user: firebase.User | null) => {
-      console.log(user);
+    auth.onAuthStateChanged(async (user: firebase.User | null) => {
+      const token = await user?.getIdToken();
+
+      setToken(token);
       setUser(user!);
     });
   }, []);
+
+  useEffect(() => {
+    const ws: WebSocket = new WebSocket("ws://localhost:8080");
+    ws.onopen = function () {
+      ws.send(token!);
+      ws.close();
+    };
+  }, [token]);
 
   return (
     <div className="container text-center">
@@ -24,8 +31,7 @@ export const AuthPage = (): JSX.Element => {
         <button
           className="w-1/3 h-12 border rounded-lg border-gray-300 shadow-md"
           onClick={() => {
-            const user = getCurrentUser();
-            user?.getIdToken().then((result) => console.log(result));
+            console.log(`[token]: ${token}`);
           }}
         >
           Signed In
