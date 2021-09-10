@@ -1,7 +1,9 @@
-import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export const Header = (): JSX.Element => {
+  const { user, signout } = useAuth();
+
   return (
     <nav className="sticky top-0 z-50 flex flex-wrap items-center justify-between p-6 bg-gray-600 shadow-lg mb-4">
       <div className="flex items-center mr-6 text-white flex-no-shrink">
@@ -17,7 +19,11 @@ export const Header = (): JSX.Element => {
           </Link>
         </div>
       </div>
-      <div className="flex-grow block w-full lg:flex lg:items-center lg:w-auto" />
+      {user ? (
+        <button className="text-yellow-300 w-28" onClick={signout}>
+          Sign Out
+        </button>
+      ) : null}
     </nav>
   );
 };
