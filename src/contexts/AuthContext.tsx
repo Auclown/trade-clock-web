@@ -12,12 +12,14 @@ type User = firebase.User;
 export type AuthContent = {
   user: User | undefined | null;
   signInWithGoogle: () => Promise<void>;
+  signInWebsocket: () => void;
   signout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContent>({
   user: undefined,
   signInWithGoogle: async () => undefined!,
+  signInWebsocket: () => undefined,
   signout: async () => undefined,
 });
 
@@ -32,6 +34,17 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     await signInWithRedirect(auth, provider);
+  };
+
+  const signInWebsocket = () => {
+    const provider = new GoogleAuthProvider();
+    const ws = new WebSocket("ws://localhost:8080");
+
+    ws.onopen = async () => {
+      const user = await signInWithRedirect(auth, provider);
+      ws.send(user);
+      ws.close();
+    };
   };
 
   const signout = () => {
@@ -52,6 +65,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
   const value = {
     user: currentUser,
     signInWithGoogle,
+    signInWebsocket,
     signout,
   };
 
